@@ -1,0 +1,71 @@
+name: PR Discord Notifications
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+    branches: ["main", "master", "develop"]
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Build PR message
+        id: build_message
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          ACTION="${{ github.event.action }}"
+          MERGED="${{ github.event.pull_request.merged }}"
+          REPO="${{ github.repository }}"
+
+          if [ "$ACTION" = "closed" ] && [ "$MERGED" = "true" ]; then
+            STATUS="✅ PR #$PR_NUMBER merged"
+            COLOR=3066993
+          elif [ "$ACTION" = "closed" ]; then
+            STATUS="❌ PR #$PR_NUMBER closed without merge"
+            COLOR=15158332
+          elif [ "$ACTION" = "opened" ]; then
+            STATUS="🆕 New PR #$PR_NUMBER opened"
+            COLOR=3447003
+          elif [ "$ACTION" = "reopened" ]; then
+            STATUS="🔁 PR #$PR_NUMBER reopened"
+            COLOR=15105570
+          else
+            STATUS="🔄 PR #$PR_NUMBER updated"
+            COLOR=10181046
+          fi
+
+          # On échappe les guillemets pour le JSON
+          PR_TITLE_ESCAPED=$(echo "$PR_TITLE" | sed 's/"/\\"/g')
+
+          cat <<EOF >> pr_payload.json
+          {
+            "embeds": [
+              {
+                "title": "$STATUS",
+                "description": "**$PR_TITLE_ESCAPED**",
+                "url": "$PR_URL",
+                "color": $COLOR,
+                "fields": [
+                  { "name": "Repository", "value": "$REPO", "inline": true },
+                  { "name": "Author", "value": "$PR_AUTHOR", "inline": true },
+                  { "name": "Action", "value": "$ACTION", "inline": true }
+                ]
+              }
+            ]
+          }
+          EOF
+
+      - name: Send notification to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d @pr_payload.json \
+            "$DISCORD_WEBHOOK_URL"

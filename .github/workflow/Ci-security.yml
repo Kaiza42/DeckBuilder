@@ -1,0 +1,30 @@
+name: DeckBuilder Security
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+  pull_request:
+    branches: ["main", "master", "develop"]
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  dependencies:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore
+        working-directory: ./DeckBuilder
+        run: dotnet restore DeckBuilder.csproj
+
+      - name: Check vulnerable packages
+        working-directory: ./DeckBuilder
+        run: dotnet list package --vulnerable
