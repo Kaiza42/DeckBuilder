@@ -1,5 +1,75 @@
+########################
+# Rider / IntelliJ
+########################
+.idea/
+*.sln.iml
+
+########################
+# VS / VS Code
+########################
+.vs/
+.vscode/
+
+########################
+# Build .NET
+########################
 bin/
 obj/
-/packages/
-riderModule.iml
-/_ReSharper.Caches/
+[Bb]uild/
+[Ll]og/
+TestResults/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+########################
+# Logs
+########################
+*.log
+logs/
+log/
+
+########################
+# Temp / OS
+########################
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+########################
+# Packages / NuGet
+########################
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+########################
+# Coverage / analyse
+########################
+coverage/
+*.coverage
+*.coveragexml
+.coverage
+.opencover.xml
+TestResults.xml
+
+########################
+# Docker / Compose (runtime)
+########################
+docker-compose.override.yml
+*.pid
+
+########################
+# Secrets (si jamais tu en utilises)
+########################
+*.env
+*.env.local
+.env.*
+secrets.json
+appsettings.*.local.json
