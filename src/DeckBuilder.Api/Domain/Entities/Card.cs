@@ -12,7 +12,7 @@ namespace DeckBuilder.Domain.Entities
         /// <summary>
         /// Gets or sets the internal identifier of the card.
         /// </summary>
-        public Guid Id { get; set; }
+        public Guid IdCard { get; set; }
 
         /// <summary>
         /// Gets or sets the unique Scryfall identifier of the card.
