@@ -1,8 +1,6 @@
 name: PR Discord Notifications
 
 on:
-  push:
-    branches: ["main", "master", "develop"]
   pull_request:
     types: [opened, reopened, synchronize, closed]
     branches: ["main", "master", "develop"]
