@@ -1,8 +1,6 @@
 name: PR Discord Notifications
 
 on:
-  push:
-    branches: ["main", "master", "develop"]
   pull_request:
     types: [opened, reopened, synchronize, closed]
     branches: ["main", "master", "develop"]
@@ -40,9 +38,10 @@ jobs:
             COLOR=10181046
           fi
 
+          # Échapper les guillemets pour le JSON
           PR_TITLE_ESCAPED=$(echo "$PR_TITLE" | sed 's/"/\\"/g')
 
-          cat <<EOF >> pr_payload.json
+          cat <<EOF > pr_payload.json
           {
             "embeds": [
               {

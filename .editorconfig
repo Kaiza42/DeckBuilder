@@ -1,0 +1,17 @@
+root = true
+
+[*.cs]
+# Header pas obligatoire / pas strict
+dotnet_diagnostic.SA1633.severity = none
+dotnet_diagnostic.SA1636.severity = none
+
+# Using directives doivent être dans le namespace (vu que tu aimes ça)
+dotnet_diagnostic.SA1200.severity = error
+
+# XML comment analysis : demander mais pas obligatoire
+dotnet_diagnostic.SA0001.severity = suggestion
+
+# Doc XML : utile mais pas bloquant
+dotnet_diagnostic.SA1600.severity = suggestion
+dotnet_diagnostic.SA1611.severity = suggestion
+dotnet_diagnostic.SA1615.severity = suggestion

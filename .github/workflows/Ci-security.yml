@@ -22,9 +22,9 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Restore
-        working-directory: ./DeckBuilder
-        run: dotnet restore DeckBuilder.csproj
+        working-directory: ./src/DeckBuilder.Api
+        run: dotnet restore DeckBuilder.Api.csproj
 
       - name: Check vulnerable packages
-        working-directory: ./DeckBuilder
-        run: dotnet list package --vulnerable
+        working-directory: ./src/DeckBuilder.Api
+        run: dotnet list package --vulnerable --include-transitive
