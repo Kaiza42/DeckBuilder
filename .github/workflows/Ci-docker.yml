@@ -19,6 +19,6 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            -f DeckBuilder/Dockerfile \
+            -f src/DeckBuilder.Api/Dockerfile \
             -t deckbuilder-api:ci \
             DeckBuilder

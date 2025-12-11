@@ -60,11 +60,11 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Restore
-        working-directory: ./DeckBuilder
-        run: dotnet restore DeckBuilder.csproj
+        working-directory: ./src/DeckBuilder.Api
+        run: dotnet restore DeckBuilder.Api.csproj
 
       - name: Test with coverage
-        working-directory: ./DeckBuilder
+        working-directory: ./src/DeckBuilder.Api
         run: |
           if ls *Tests.csproj 1> /dev/null 2>&1; then
             for proj in *Tests.csproj; do

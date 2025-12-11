@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DeckBuilder.Api", "DeckBuilder.Api", "{D71C8943-85AB-D2F1-DAB5-DCCBF21CF368}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeckBuilder", "src\DeckBuilder.Api\DeckBuilder.csproj", "{353D5D23-2796-4208-B568-AE8B9752572E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeckBuilder.Api", "src\DeckBuilder.Api\DeckBuilder.Api.csproj", "{353D5D23-2796-4208-B568-AE8B9752572E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

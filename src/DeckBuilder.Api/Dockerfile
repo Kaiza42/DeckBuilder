@@ -8,13 +8,13 @@ WORKDIR /src
 COPY ["DeckBuilder.csproj", "./"]
 
 # Restore des dépendances
-RUN dotnet restore "DeckBuilder.csproj"
+RUN dotnet restore "DeckBuilder.Api.csproj"
 
 # On copie le reste du code source
 COPY . .
 
 # Publish en Release dans /app/publish
-RUN dotnet publish "DeckBuilder.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "DeckBuilder.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # =========================
 #  STAGE 2 : Runtime (.NET 9)
