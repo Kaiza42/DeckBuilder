@@ -27,4 +27,4 @@ jobs:
 
       - name: Check vulnerable packages
         working-directory: ./src/DeckBuilder.Api
-        run: dotnet list package --vulnerable
+        run: dotnet list package --vulnerable --include-transitive

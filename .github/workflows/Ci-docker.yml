@@ -21,4 +21,4 @@ jobs:
           docker build \
             -f src/DeckBuilder.Api/Dockerfile \
             -t deckbuilder-api:ci \
-            DeckBuilder
+            src/DeckBuilder.Api

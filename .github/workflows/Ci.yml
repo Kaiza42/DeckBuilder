@@ -35,16 +35,16 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Restore dependencies
-        working-directory: ./DeckBuilder
-        run: dotnet restore DeckBuilder.csproj
+        working-directory: ./src/DeckBuilder.Api
+        run: dotnet restore DeckBuilder.Api.csproj
 
       - name: Check code format (dotnet format)
-        working-directory: ./DeckBuilder
+        working-directory: ./src/DeckBuilder.Api
         run: dotnet format --verify-no-changes
 
       - name: Build with analyzers (warnings = errors)
-        working-directory: ./DeckBuilder
-        run: dotnet build DeckBuilder.csproj --configuration Release
+        working-directory: ./src/DeckBuilder.Api
+        run: dotnet build DeckBuilder.Api.csproj --configuration Release
 
   coverage:
     runs-on: ubuntu-latest
@@ -90,3 +90,29 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore
+        working-directory: ./src/DeckBuilder.Api
+        run: dotnet restore DeckBuilder.Api.csproj
+
+      - name: Build API project
+        working-directory: ./src/DeckBuilder.Api
+        run: dotnet build DeckBuilder.Api.csproj --configuration Release --no-restore
+
+      - name: Run tests (if any)
+        working-directory: ./src/DeckBuilder.Api
+        run: |
+          if ls *Tests.csproj 1> /dev/null 2>&1; then
+            for proj in *Tests.csproj; do
+              dotnet test "$proj" \
+                --configuration Release \
+                --no-build
+            done
+          else
+            echo "No test projects found, skipping tests."
+          fi
