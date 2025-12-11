@@ -2,7 +2,7 @@
   deckbuilder-api:
     container_name: deckbuilder-api
     build:
-      context: ./DeckBuilder
+      context: ./src/DeckBuilder
       dockerfile: Dockerfile
     image: deckbuilder-api:latest
     ports:

@@ -1,0 +1,8 @@
+root = true
+
+[*.cs]
+
+dotnet_diagnostic.SA1200.severity = error
+dotnet_diagnostic.SA1600.severity = suggestion
+dotnet_diagnostic.SA1611.severity = suggestion
+dotnet_diagnostic.SA1615.severity = suggestion
