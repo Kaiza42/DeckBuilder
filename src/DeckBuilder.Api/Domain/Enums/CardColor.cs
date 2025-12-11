@@ -1,5 +1,7 @@
 namespace DeckBuilder.Domain.Enums
 {
+    using System;
+
     /// <summary>
     /// Represents the colors of a Magic: The Gathering card.
     /// This enum is flagged to support multicolored cards.

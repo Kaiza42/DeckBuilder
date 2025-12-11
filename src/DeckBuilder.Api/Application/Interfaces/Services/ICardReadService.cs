@@ -1,10 +1,9 @@
 namespace DeckBuilder.Application.Interfaces.Services
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using DeckBuilder.Application.DTOs.Card;
+    using DeckBuilder.Application.DTOs.Cards;
 
     /// <summary>
     /// Defines read-only operations used by the API to retrieve card information.
@@ -12,15 +11,7 @@ namespace DeckBuilder.Application.Interfaces.Services
     public interface ICardReadService
     {
         /// <summary>
-        /// Retrieves a card by its internal identifier and returns it as a <see cref="CardDto"/>.
-        /// </summary>
-        /// <param name="id">The identifier of the card.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>The matching card DTO, or null if no card is found.</returns>
-        Task<CardDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Retrieves a card by its Scryfall identifier and returns it as a <see cref="CardDto"/>.
+        /// Retrieves a card by its Scryfall identifier.
         /// </summary>
         /// <param name="scryfallId">The Scryfall identifier of the card.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -28,12 +19,11 @@ namespace DeckBuilder.Application.Interfaces.Services
         Task<CardDto?> GetByScryfallIdAsync(string scryfallId, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Searches for cards matching the specified filters and pagination settings
-        /// and returns them as a collection of <see cref="CardDto"/> objects.
+        /// Searches for cards using a free-text query understood by Scryfall.
         /// </summary>
-        /// <param name="parameters">The search and pagination parameters.</param>
+        /// <param name="query">The search query (for example, "lightning bolt").</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A read-only collection of card DTOs that match the given parameters.</returns>
-        Task<IReadOnlyCollection<CardDto>> SearchAsync(CardSearchParameters parameters, CancellationToken cancellationToken);
+        /// <returns>A read-only collection of matching card DTOs.</returns>
+        Task<IReadOnlyCollection<CardDto>> SearchAsync(string query, CancellationToken cancellationToken);
     }
 }

@@ -1,22 +1,15 @@
-namespace DeckBuilder.Application.DTOs.Card
+namespace DeckBuilder.Application.DTOs.Cards
 {
-    using System;
     using DeckBuilder.Domain.Enums;
 
     /// <summary>
     /// Represents a data transfer object used to expose card information through the API.
-    /// This DTO is intended for read-only scenarios (API responses).
+    /// This DTO is built from Scryfall data and is intended for read-only scenarios.
     /// </summary>
     public class CardDto
     {
         /// <summary>
-        /// Gets or sets the internal identifier of the card.
-        /// </summary>
-        public Guid IdCard { get; set; }
-
-        /// <summary>
         /// Gets or sets the unique Scryfall identifier of the card.
-        /// This can be used by clients to query additional data from Scryfall.
         /// </summary>
         public string ScryfallId { get; set; } = null!;
 
@@ -92,11 +85,13 @@ namespace DeckBuilder.Application.DTOs.Card
 
         /// <summary>
         /// Gets or sets a value indicating whether this card represents a token.
+        /// Currently always false as token detection is not implemented.
         /// </summary>
         public bool IsToken { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this card has multiple faces.
+        /// Currently always false as double-faced detection is not implemented.
         /// </summary>
         public bool IsDoubleFaced { get; set; }
     }

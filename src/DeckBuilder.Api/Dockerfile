@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # On copie le fichier csproj
-COPY ["DeckBuilder.csproj", "./"]
+COPY ["DeckBuilder.Api.csproj", "./"]
 
 # Restore des dépendances
 RUN dotnet restore "DeckBuilder.Api.csproj"
@@ -33,4 +33,4 @@ COPY --from=build /app/publish .
 EXPOSE 8080
 
 # Lancer l'API
-ENTRYPOINT ["dotnet", "DeckBuilder.dll"]
+ENTRYPOINT ["dotnet", "DeckBuilder.Api.dll"]
