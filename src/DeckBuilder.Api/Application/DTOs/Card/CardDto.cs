@@ -1,4 +1,4 @@
-namespace DeckBuilder.Application.DTOs.Cards
+namespace DeckBuilder.Application.DTOs.Card
 {
     using DeckBuilder.Domain.Enums;
 

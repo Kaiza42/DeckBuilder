@@ -7,6 +7,7 @@ namespace DeckBuilder.Infrastructure.Scryfall
     using System.Threading;
     using System.Threading.Tasks;
     using DeckBuilder.Infrastructure.Scryfall.Models;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Provides an HTTP-based implementation of <see cref="IScryfallClient"/> using the Scryfall REST API.
@@ -14,14 +15,20 @@ namespace DeckBuilder.Infrastructure.Scryfall
     public sealed class ScryfallClient : IScryfallClient
     {
         private readonly HttpClient httpClient;
+        private readonly ILogger<ScryfallClient> logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScryfallClient"/> class.
         /// </summary>
         /// <param name="httpClient">The HTTP client configured with the Scryfall base address.</param>
-        public ScryfallClient(HttpClient httpClient)
+        /// <param name="logger">The logger instance.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="httpClient"/> or <paramref name="logger"/> is null.
+        /// </exception>
+        public ScryfallClient(HttpClient httpClient, ILogger<ScryfallClient> logger)
         {
-            this.httpClient = httpClient;
+            this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <inheritdoc/>
@@ -29,52 +36,97 @@ namespace DeckBuilder.Infrastructure.Scryfall
         {
             var url = $"cards/{Uri.EscapeDataString(scryfallId)}";
 
-            using var response = await this.httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-                Console.Error.WriteLine(
-                    $"[Scryfall][GetById] HTTP {(int)response.StatusCode} {response.StatusCode} for id '{scryfallId}'. Body: {errorBody}");
+                using var response = await this.httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                    this.logger.LogWarning(
+                        "[Scryfall][GetById] HTTP {StatusCode} for id '{ScryfallId}'. Body: {Body}",
+                        (int)response.StatusCode,
+                        scryfallId,
+                        errorBody);
+
+                    return null;
+                }
+
+                var card = await response.Content
+                    .ReadFromJsonAsync<ScryfallCard>(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (card is null)
+                {
+                    this.logger.LogWarning(
+                        "[Scryfall][GetById] Empty JSON payload for id '{ScryfallId}'.",
+                        scryfallId);
+                }
+
+                return card;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(
+                    ex,
+                    "[Scryfall][GetById] Unexpected error for id '{ScryfallId}'.",
+                    scryfallId);
 
                 return null;
             }
-
-            var card = await response.Content
-                .ReadFromJsonAsync<ScryfallCard>(cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            return card;
         }
 
         /// <inheritdoc/>
-        public async Task<IReadOnlyCollection<ScryfallCard>> SearchCardsAsync(
-            string query,
-            CancellationToken cancellationToken)
+        public async Task<IReadOnlyCollection<ScryfallCard>> SearchCardsAsync(string query, CancellationToken cancellationToken)
         {
             var url = $"cards/search?q={Uri.EscapeDataString(query)}";
 
-            using var response = await this.httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-                Console.Error.WriteLine(
-                    $"[Scryfall][Search] HTTP {(int)response.StatusCode} {response.StatusCode} for query '{query}'. Body: {errorBody}");
+                using var response = await this.httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                    this.logger.LogWarning(
+                        "[Scryfall][Search] HTTP {StatusCode} for query '{Query}'. Body: {Body}",
+                        (int)response.StatusCode,
+                        query,
+                        errorBody);
+
+                    return Array.Empty<ScryfallCard>();
+                }
+
+                var list = await response.Content
+                    .ReadFromJsonAsync<ScryfallListResponse<ScryfallCard>>(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (list?.Data is null || list.Data.Count == 0)
+                {
+                    return Array.Empty<ScryfallCard>();
+                }
+
+                return list.Data;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(
+                    ex,
+                    "[Scryfall][Search] Unexpected error for query '{Query}'.",
+                    query);
 
                 return Array.Empty<ScryfallCard>();
             }
-
-            var list = await response.Content
-                .ReadFromJsonAsync<ScryfallListResponse<ScryfallCard>>(cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            if (list?.Data is null || list.Data.Count == 0)
-            {
-                return Array.Empty<ScryfallCard>();
-            }
-
-            return list.Data;
         }
     }
 }

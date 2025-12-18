@@ -22,7 +22,6 @@
 
     <ItemGroup>
       <Folder Include="Application\Interfaces\Repositories\" />
-      <Folder Include="Application\Mappings\" />
       <Folder Include="Domain\Entities\" />
       <Folder Include="Infrastructure\Persistence\Configurations\" />
       <Folder Include="Infrastructure\Repositories\" />

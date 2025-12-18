@@ -1,73 +1,120 @@
-namespace DeckBuilder.Api.Controllers;
-
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using DeckBuilder.Application.DTOs.Cards;
-using DeckBuilder.Application.Interfaces.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
-/// <summary>
-/// Provides read-only endpoints to retrieve card information from Scryfall.
-/// </summary>
-[ApiController]
-[Route("api/[controller]")]
-public class CardsController : ControllerBase
+namespace DeckBuilder.Controllers
 {
-    private readonly ICardReadService cardReadService;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using DeckBuilder.Application.DTOs.Card;
+    using DeckBuilder.Application.Interfaces.Services;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CardsController"/> class.
+    /// Exposes endpoints to search and retrieve Magic: The Gathering cards from Scryfall.
     /// </summary>
-    /// <param name="cardReadService">The service used to retrieve card information.</param>
-    public CardsController(ICardReadService cardReadService)
+    [ApiController]
+    [Route("api/[controller]")]
+    [Produces("application/json")]
+    public class CardsController : ControllerBase
     {
-        this.cardReadService = cardReadService;
-    }
+        private readonly ICardReadService cardReadService;
 
-    /// <summary>
-    /// Retrieves a card by its Scryfall identifier.
-    /// </summary>
-    /// <param name="scryfallId">The Scryfall identifier of the card.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>
-    /// Returns <see cref="StatusCodes.Status200OK"/> with the card,
-    /// or <see cref="StatusCodes.Status404NotFound"/> if it does not exist.
-    /// </returns>
-    [HttpGet("scryfall/{scryfallId}")]
-    [ProducesResponseType(typeof(CardDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetByScryfallIdAsync(string scryfallId, CancellationToken cancellationToken)
-    {
-        var card = await this.cardReadService
-            .GetByScryfallIdAsync(scryfallId, cancellationToken)
-            .ConfigureAwait(false);
-
-        if (card is null)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CardsController"/> class.
+        /// </summary>
+        /// <param name="cardReadService">The card read service.</param>
+        public CardsController(ICardReadService cardReadService)
         {
-            return this.NotFound();
+            this.cardReadService = cardReadService;
         }
 
-        return this.Ok(card);
-    }
+        /// <summary>
+        /// Retrieves a card by its Scryfall identifier.
+        /// </summary>
+        /// <param name="scryfallId">The Scryfall identifier of the card.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The matching card, or 404 when not found.</returns>
+        [HttpGet("{scryfallId}")]
+        [ProducesResponseType(typeof(CardDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<CardDto>> GetByScryfallIdAsync(
+            [FromRoute] string scryfallId,
+            CancellationToken cancellationToken)
+        {
+            var card = await this.cardReadService
+                .GetByScryfallIdAsync(scryfallId, cancellationToken)
+                .ConfigureAwait(false);
 
-    /// <summary>
-    /// Searches for cards using a Scryfall-compatible query string.
-    /// </summary>
-    /// <param name="q">The search query (for example, "lightning bolt").</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>
-    /// Returns <see cref="StatusCodes.Status200OK"/> with a collection of matching cards.
-    /// </returns>
-    [HttpGet("search")]
-    [ProducesResponseType(typeof(IReadOnlyCollection<CardDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> SearchAsync([FromQuery] string q, CancellationToken cancellationToken)
-    {
-        var cards = await this.cardReadService
-            .SearchAsync(q, cancellationToken)
-            .ConfigureAwait(false);
+            if (card is null)
+            {
+                return this.NotFound();
+            }
 
-        return this.Ok(cards);
+            return this.Ok(card);
+        }
+
+        /// <summary>
+        /// Searches cards using a raw Scryfall query string.
+        /// </summary>
+        /// <param name="q">The Scryfall query (e.g., "f:standard c:ur cmc&lt;=2 r:rare").</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A list of matching cards.</returns>
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(IReadOnlyCollection<CardDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<IReadOnlyCollection<CardDto>>> SearchByQueryAsync(
+            [FromQuery(Name = "q"), Required] string q,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+            {
+                return this.BadRequest("Query parameter 'q' is required.");
+            }
+
+            var cards = await this.cardReadService
+                .SearchAsync(q, cancellationToken)
+                .ConfigureAwait(false);
+
+            return this.Ok(cards);
+        }
+
+        /// <summary>
+        /// Searches cards using structured criteria.
+        /// </summary>
+        /// <param name="criteria">The structured search criteria.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A list of matching cards.</returns>
+        [HttpPost("search")]
+        [Consumes("application/json")]
+        [ProducesResponseType(typeof(IReadOnlyCollection<CardDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<IReadOnlyCollection<CardDto>>> SearchByCriteriaAsync(
+            [FromBody, Required] CardSearchCriteriaDto? criteria,
+            CancellationToken cancellationToken)
+        {
+            if (criteria is null)
+            {
+                return this.BadRequest("Request body is required.");
+            }
+
+            var hasAnyFilter =
+                !string.IsNullOrWhiteSpace(criteria.Name) ||
+                !string.IsNullOrWhiteSpace(criteria.Format) ||
+                criteria.Colors is not null ||
+                criteria.MinCmc is not null ||
+                criteria.MaxCmc is not null ||
+                criteria.Rarity is not null;
+
+            if (!hasAnyFilter)
+            {
+                return this.BadRequest("At least one search criterion must be provided.");
+            }
+
+            var cards = await this.cardReadService
+                .SearchAsync(criteria, cancellationToken)
+                .ConfigureAwait(false);
+
+            return this.Ok(cards);
+        }
     }
 }
