@@ -21,10 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Application\Interfaces\Repositories\" />
       <Folder Include="Domain\Entities\" />
-      <Folder Include="Infrastructure\Persistence\Configurations\" />
-      <Folder Include="Infrastructure\Repositories\" />
     </ItemGroup>
 
 </Project>

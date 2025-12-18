@@ -16,7 +16,7 @@ namespace DeckBuilder.Domain.Decks
         {
             if (idDeck == Guid.Empty)
             {
-                throw new ArgumentException("Deck id cannot be empty.", nameof(id));
+                throw new ArgumentException("Deck id cannot be empty.", nameof(idDeck));
             }
 
             if (string.IsNullOrWhiteSpace(name))
