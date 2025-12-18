@@ -12,9 +12,9 @@ namespace DeckBuilder.Domain.Decks
     {
         private readonly List<DeckEntry> entries = new List<DeckEntry>();
 
-        public Deck(Guid id, string name, string format, DeckVisibility visibility, string? description = null)
+        public Deck(Guid idDeck, string name, string format, DeckVisibility visibility, string? description = null)
         {
-            if (id == Guid.Empty)
+            if (idDeck == Guid.Empty)
             {
                 throw new ArgumentException("Deck id cannot be empty.", nameof(id));
             }
@@ -29,7 +29,7 @@ namespace DeckBuilder.Domain.Decks
                 throw new ArgumentException("Deck format is required.", nameof(format));
             }
 
-            this.Id = id;
+            this.IdDeck = idDeck;
             this.Name = name.Trim();
             this.Format = format.Trim();
             this.Visibility = visibility;
@@ -39,7 +39,7 @@ namespace DeckBuilder.Domain.Decks
             this.UpdatedAtUtc = this.CreatedAtUtc;
         }
 
-        public Guid Id { get; }
+        public Guid IdDeck { get; }
 
         public string Name { get; private set; }
 
